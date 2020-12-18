@@ -10,6 +10,14 @@ public class Guard : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
 
+    private float stoppingDistance;
+
+    [SerializeField] private Transform[] waypointList;
+    public VariableGameObject target;
+
+    private float walkSpeed = 1;
+    private float runSpeed = 2;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -18,7 +26,13 @@ public class Guard : MonoBehaviour
 
     private void Start()
     {
+        target = new VariableGameObject { Value = new GameObject("tempobj") };
+
         //Create your Behaviour Tree here!
+        tree = new BTSequence(
+                new BTPickNewWanderPoint(waypointList, target),
+                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance)
+            );
     }
 
     private void FixedUpdate()
