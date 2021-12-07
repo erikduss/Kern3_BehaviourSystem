@@ -31,7 +31,11 @@ public class Rogue : MonoBehaviour
             new BTSequence
             (
                 new BTFollow(animator, moveSpeed, agent),
-                new BTIdle(animator, moveSpeed, agent)
+                new BTIdle(animator, moveSpeed, agent),
+                new BTSequence(
+                        new BTSearchCover(),
+                        new BTThrowSmoke()
+                    )
             );
     }
 

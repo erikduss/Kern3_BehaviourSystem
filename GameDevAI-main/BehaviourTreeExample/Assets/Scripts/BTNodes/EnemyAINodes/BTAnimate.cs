@@ -4,13 +4,25 @@ using UnityEngine;
 
 public class BTAnimate : BTBaseNode
 {
+    private Animator animator;
+    private string animation;
+
     public BTAnimate(Animator anim, string clipName)
     {
-
+        animator = anim;
+        animation = clipName;
     }
 
     public override TaskStatus Run()
     {
-        return TaskStatus.Failed;
+        if(animator != null && animation != null)
+        {
+            animator.Play(animation);
+            return TaskStatus.Success;
+        }
+        else
+        {
+            return TaskStatus.Failed;
+        }
     }
 }

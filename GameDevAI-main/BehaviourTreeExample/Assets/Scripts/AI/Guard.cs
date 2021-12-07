@@ -31,7 +31,8 @@ public class Guard : MonoBehaviour
 
         //Create your Behaviour Tree here!
         tree = new BTSequence(
-                new BTPickNewWanderPoint(waypointList, target),
+                new BTPickNewWanderPoint(waypointList, target, agent),
+                new BTAnimate(animator, "Rifle Walk"),
                 new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance)
             );
     }

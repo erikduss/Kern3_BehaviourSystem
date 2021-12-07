@@ -12,6 +12,7 @@ public class BTSearchCover : BTBaseNode
 {
     public override TaskStatus Run()
     {
+        Debug.Log("Covering");
         return TaskStatus.Failed;
     }
 }

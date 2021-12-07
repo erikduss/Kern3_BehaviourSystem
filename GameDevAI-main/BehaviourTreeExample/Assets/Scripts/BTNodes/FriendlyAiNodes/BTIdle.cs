@@ -32,7 +32,10 @@ public class BTIdle : BTBaseNode
             animator.SetFloat("MoveSpeed", 0);
             return TaskStatus.Running;
         }
-        else return TaskStatus.Success;
+        else
+        {
+            return TaskStatus.Success;
+        }
         
     }
 }

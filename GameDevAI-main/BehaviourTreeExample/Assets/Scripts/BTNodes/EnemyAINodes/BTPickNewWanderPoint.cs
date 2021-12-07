@@ -8,11 +8,13 @@ public class BTPickNewWanderPoint : BTBaseNode
     private Transform[] waypoints;
     private VariableGameObject target;
     private int currentWaypoint = 0;
+    private NavMeshAgent curagent;
 
-    public BTPickNewWanderPoint(Transform[] _waypoints, VariableGameObject targ)
+    public BTPickNewWanderPoint(Transform[] _waypoints, VariableGameObject targ, NavMeshAgent agent)
     {
         waypoints = _waypoints;
         target = targ;
+        curagent = agent;
     }
 
     public override TaskStatus Run()
@@ -20,6 +22,11 @@ public class BTPickNewWanderPoint : BTBaseNode
         if(currentWaypoint >= waypoints.Length)
         {
             currentWaypoint = 0;
+        }
+
+        if(curagent.remainingDistance > 0.1f)
+        {
+            return TaskStatus.Success;
         }
 
         if(waypoints[currentWaypoint].gameObject != null)
