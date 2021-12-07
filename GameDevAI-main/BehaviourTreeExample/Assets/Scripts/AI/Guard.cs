@@ -27,6 +27,7 @@ public class Guard : MonoBehaviour
     private void Start()
     {
         target = new VariableGameObject { Value = new GameObject("tempobj") };
+        animator.SetBool("IsGuard", true);
 
         //Create your Behaviour Tree here!
         tree = new BTSequence(

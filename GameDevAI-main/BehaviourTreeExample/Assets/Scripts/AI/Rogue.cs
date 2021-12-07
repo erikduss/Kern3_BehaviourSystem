@@ -10,6 +10,9 @@ public class Rogue : MonoBehaviour
     private BTBaseNode tree;
     private NavMeshAgent agent;
     private Animator animator;
+
+    [SerializeField] private VariableFloat moveSpeed = new VariableFloat();
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -19,6 +22,17 @@ public class Rogue : MonoBehaviour
     private void Start()
     {
         //TODO: Create your Behaviour tree here
+        animator.SetBool("IsGuard", false);
+        agent.stoppingDistance = 5f;
+        //moveSpeed = Instantiate(moveSpeed);
+
+
+        tree =
+            new BTSequence
+            (
+                new BTFollow(animator, moveSpeed, agent),
+                new BTIdle(animator, moveSpeed, agent)
+            );
     }
 
     private void FixedUpdate()
