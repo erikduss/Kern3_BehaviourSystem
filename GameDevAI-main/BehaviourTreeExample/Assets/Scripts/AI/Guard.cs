@@ -13,15 +13,23 @@ public class Guard : MonoBehaviour
     private float stoppingDistance;
 
     [SerializeField] private Transform[] waypointList;
+    [SerializeField] private Transform[] weaponList;
     public VariableGameObject target;
 
     private float walkSpeed = 1;
     private float runSpeed = 2;
 
+    private GameObject player;
+    private float maxDetectionRange = 15;
+    private float enemyFov = 45;
+
+    private bool hasWeapon = false;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     private void Start()
@@ -37,9 +45,52 @@ public class Guard : MonoBehaviour
             );
     }
 
+    // check to see if a player is within viewing range
+    private bool IsPlayerNear()
+    {
+        float dist = Vector3.Distance(player.transform.position, transform.position);
+        if (dist < maxDetectionRange) // if true, an Enemy is within range
+            return true;
+        else return false;
+    }
+
+    // check to see if Enemy is in npc's current fov
+    private bool IsPlayerInEnemyFOV()
+    {
+        Vector3 targetDir = player.transform.position - transform.position;
+        Vector3 forward = transform.forward;
+        float angle = Vector3.Angle(targetDir, forward);
+        if (angle < enemyFov)
+            return true;
+        else return false;
+    }
+
+    // can the Enemy see the Player
+    private void IsPlayerSeen()
+    {
+        Vector3 direction = (player.transform.position - transform.position).normalized;
+
+        RaycastHit hit;
+
+        if ((Physics.Raycast(agent.transform.position, direction, out hit, maxDetectionRange) && hit.collider.tag == "Player"))
+        {
+            Debug.Log("Player has been seen");
+            tree = new BTSequence(
+                new BTLookForWeapon(weaponList, target, agent, hasWeapon),
+                new BTAnimate(animator, "Run"),
+                new BTMoveToTarget(agent, runSpeed, target, stoppingDistance)
+            );
+        }
+    }
+
     private void FixedUpdate()
     {
         tree?.Run();
+
+        if(IsPlayerNear() && IsPlayerInEnemyFOV())
+        {
+            IsPlayerSeen();
+        }
     }
 
     //private void OnDrawGizmos()
