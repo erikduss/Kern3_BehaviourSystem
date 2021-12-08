@@ -23,7 +23,15 @@ public class Guard : MonoBehaviour
     private float maxDetectionRange = 15;
     private float enemyFov = 45;
 
-    private bool hasWeapon = false;
+    private VariableFloat hasWeapon;
+    private VariableGameObject lastKnownPlayerPosition;
+
+    private bool isChasing = false;
+    private bool isOnGuard = false;
+    private bool playerInSight = false;
+    private bool playerAlive = true;
+
+    [SerializeField] private TextMesh stateText;
 
     private void Awake()
     {
@@ -35,13 +43,14 @@ public class Guard : MonoBehaviour
     private void Start()
     {
         target = new VariableGameObject { Value = new GameObject("tempobj") };
+        hasWeapon = new VariableFloat { Value = 0f };
         animator.SetBool("IsGuard", true);
 
         //Create your Behaviour Tree here!
         tree = new BTSequence(
-                new BTPickNewWanderPoint(waypointList, target, agent),
-                new BTAnimate(animator, "Rifle Walk"),
-                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance)
+                new BTPickNewWanderPoint(waypointList, target, agent, stateText),
+                new BTAnimate(animator, "Rifle Walk", stateText),
+                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText)
             );
     }
 
@@ -74,12 +83,52 @@ public class Guard : MonoBehaviour
 
         if ((Physics.Raycast(agent.transform.position, direction, out hit, maxDetectionRange) && hit.collider.tag == "Player"))
         {
-            Debug.Log("Player has been seen");
-            tree = new BTSequence(
-                new BTLookForWeapon(weaponList, target, agent, hasWeapon),
-                new BTAnimate(animator, "Run"),
-                new BTMoveToTarget(agent, runSpeed, target, stoppingDistance)
-            );
+            playerInSight = true;
+            if (!isOnGuard)
+            {
+                Debug.Log("Player has been seen");
+
+                lastKnownPlayerPosition = new VariableGameObject { Value = new GameObject("lastknownpos") };
+                lastKnownPlayerPosition.Value.transform.position = player.transform.position;
+                
+                tree = new BTSequence(
+                    new BTAnimate(animator, "Run", stateText),
+                    new BTLookForWeapon(weaponList, target, agent, hasWeapon, lastKnownPlayerPosition, isChasing, stateText),
+                    new BTChasePlayer(playerInSight, hasWeapon, target, stateText),
+                    new BTMoveToTarget(agent, runSpeed, target, stoppingDistance, stateText)
+                );
+
+                isOnGuard = true;
+                StartCoroutine(GiveUpChase(10));
+            }
+            else if (hasWeapon.Value > 0)
+            {
+                if (agent.remainingDistance < 1f)
+                {
+                    playerAlive = false;
+                    tree = null;
+                    animator.Play("Kick");
+                    StartCoroutine(GiveUpChase(2));
+                }
+                lastKnownPlayerPosition.Value.transform.position = player.transform.position;
+                isChasing = true;
+            }
+            else
+            {
+                lastKnownPlayerPosition.Value.transform.position = player.transform.position;
+                isChasing = false;
+            }
+        }
+        else
+        {
+            /*lastKnownPlayerPosition = new VariableGameObject { Value = new GameObject("lastknownpos") };
+            lastKnownPlayerPosition.Value.transform.position = player.transform.position;
+
+            target.Value = lastKnownPlayerPosition.Value;*/
+
+            Debug.Log("Cant see the player");
+            playerInSight = false;
+            isChasing = false;
         }
     }
 
@@ -87,9 +136,39 @@ public class Guard : MonoBehaviour
     {
         tree?.Run();
 
-        if(IsPlayerNear() && IsPlayerInEnemyFOV())
+        if(IsPlayerNear() && IsPlayerInEnemyFOV() && playerAlive)
         {
             IsPlayerSeen();
+        }
+        else
+        {
+            playerInSight = false;
+            isChasing = false;
+        }
+    }
+
+    private void RevertBackToWander()
+    {
+        playerInSight = false;
+        isChasing = false;
+        isOnGuard = false;
+
+        target.Value = waypointList[1].gameObject;
+
+        tree = new BTSequence(
+                new BTPickNewWanderPoint(waypointList, target, agent, stateText),
+                new BTAnimate(animator, "Rifle Walk", stateText),
+                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText)
+            );
+    }
+
+    private IEnumerator GiveUpChase(int delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (!playerInSight)
+        {
+            RevertBackToWander();
+            Debug.Log("Giving up");
         }
     }
 

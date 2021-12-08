@@ -9,17 +9,21 @@ public class BTMoveToTarget : BTBaseNode
     private float speed;
     private NavMeshAgent agent;
     private float stoppingDistance;
+    private TextMesh stateText;
 
-    public BTMoveToTarget(NavMeshAgent _agent, float movespeed, VariableGameObject _target, float stoppingDist)
+    public BTMoveToTarget(NavMeshAgent _agent, float movespeed, VariableGameObject _target, float stoppingDist, TextMesh text)
     {
         agent = _agent;
         target = _target;
         speed = movespeed;
         stoppingDistance = stoppingDist;
+        stateText = text;
     }
 
     public override TaskStatus Run()
     {
+        stateText.text = "MoveToTarget";
+
         if(agent != null && target != null)
         {
             agent.speed = speed;
