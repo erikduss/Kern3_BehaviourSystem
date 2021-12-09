@@ -17,16 +17,20 @@ public class BTIdle : BTBaseNode
 
     private GameObject player;
 
-    public BTIdle(Animator anim, VariableFloat speed, NavMeshAgent rogue)
+    private TextMesh stateText;
+
+    public BTIdle(Animator anim, VariableFloat speed, NavMeshAgent rogue, TextMesh text)
     {
         animator = anim;
         moveSpeed = speed;
         agent = rogue;
         player = GameObject.FindGameObjectWithTag("Player");
+        stateText = text;
     }
 
     public override TaskStatus Run()
     {
+        stateText.text = "Idle";
         if (Vector3.Distance(agent.gameObject.transform.position, player.transform.position) < 5)
         {
             animator.SetFloat("MoveSpeed", 0);

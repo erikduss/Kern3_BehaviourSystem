@@ -17,16 +17,20 @@ public class BTFollow : BTBaseNode
 
     private GameObject player;
 
-    public BTFollow(Animator anim, VariableFloat speed, NavMeshAgent rogue)
+    private TextMesh stateText;
+
+    public BTFollow(Animator anim, VariableFloat speed, NavMeshAgent rogue, TextMesh text)
     {
         animator = anim;
         moveSpeed = speed;
         agent = rogue;
         player = GameObject.FindGameObjectWithTag("Player");
+        stateText = text;
     }
 
     public override TaskStatus Run()
     {
+        stateText.text = "Follow";
         //Debug.Log(Vector3.Distance(agent.gameObject.transform.position, player.transform.position));
         if (Vector3.Distance(agent.gameObject.transform.position, player.transform.position) >= 5)
         {

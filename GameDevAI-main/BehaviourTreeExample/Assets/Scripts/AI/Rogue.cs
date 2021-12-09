@@ -13,6 +13,8 @@ public class Rogue : MonoBehaviour
 
     [SerializeField] private VariableFloat moveSpeed = new VariableFloat();
 
+    [SerializeField] private TextMesh stateText;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -30,8 +32,8 @@ public class Rogue : MonoBehaviour
         tree =
             new BTSequence
             (
-                new BTFollow(animator, moveSpeed, agent),
-                new BTIdle(animator, moveSpeed, agent),
+                new BTFollow(animator, moveSpeed, agent, stateText),
+                new BTIdle(animator, moveSpeed, agent, stateText),
                 new BTSequence(
                         new BTSearchCover(),
                         new BTThrowSmoke()

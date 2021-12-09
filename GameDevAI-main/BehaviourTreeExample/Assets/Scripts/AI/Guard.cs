@@ -108,6 +108,10 @@ public class Guard : MonoBehaviour
                     playerAlive = false;
                     tree = null;
                     animator.Play("Kick");
+
+                    IDamageable playerdamageable = player.GetComponent<Player>();
+                    playerdamageable.TakeDamage(this.gameObject,1000);
+
                     StartCoroutine(GiveUpChase(2));
                 }
                 lastKnownPlayerPosition.Value.transform.position = player.transform.position;
