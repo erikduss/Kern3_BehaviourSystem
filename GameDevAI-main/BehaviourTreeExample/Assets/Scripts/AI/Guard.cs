@@ -20,6 +20,7 @@ public class Guard : MonoBehaviour
     private float runSpeed = 2;
 
     private GameObject player;
+    private Player playerScript;
     private float maxDetectionRange = 15;
     private float enemyFov = 45;
 
@@ -38,6 +39,7 @@ public class Guard : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
         player = GameObject.FindGameObjectWithTag("Player");
+        playerScript = player.GetComponent<Player>();
     }
 
     private void Start()
@@ -84,6 +86,7 @@ public class Guard : MonoBehaviour
         if ((Physics.Raycast(agent.transform.position, direction, out hit, maxDetectionRange) && hit.collider.tag == "Player"))
         {
             playerInSight = true;
+            playerScript.isBeingChased = true;
             if (!isOnGuard)
             {
                 Debug.Log("Player has been seen");
@@ -156,6 +159,7 @@ public class Guard : MonoBehaviour
         playerInSight = false;
         isChasing = false;
         isOnGuard = false;
+        playerScript.isBeingChased = false;
 
         target.Value = waypointList[1].gameObject;
 

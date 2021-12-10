@@ -12,34 +12,37 @@ using UnityEngine.AI;
 public class BTIdle : BTBaseNode
 {
     private Animator animator;
-    private VariableFloat moveSpeed;
     private NavMeshAgent agent;
 
     private GameObject player;
+    private Player playerScript;
 
     private TextMesh stateText;
 
-    public BTIdle(Animator anim, VariableFloat speed, NavMeshAgent rogue, TextMesh text)
+    public BTIdle(Animator anim, NavMeshAgent rogue, TextMesh text, Player script)
     {
         animator = anim;
-        moveSpeed = speed;
         agent = rogue;
         player = GameObject.FindGameObjectWithTag("Player");
         stateText = text;
+        playerScript = script;
     }
 
     public override TaskStatus Run()
     {
-        stateText.text = "Idle";
-        if (Vector3.Distance(agent.gameObject.transform.position, player.transform.position) < 5)
+        if (!playerScript.isBeingChased)
         {
-            animator.SetFloat("MoveSpeed", 0);
-            return TaskStatus.Running;
+            stateText.text = "Idle";
+            if (Vector3.Distance(agent.gameObject.transform.position, player.transform.position) < 5)
+            {
+                animator.SetFloat("MoveSpeed", 0);
+                return TaskStatus.Running;
+            }
+            else
+            {
+                return TaskStatus.Success;
+            }
         }
-        else
-        {
-            return TaskStatus.Success;
-        }
-        
+        return TaskStatus.Success;
     }
 }

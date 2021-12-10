@@ -12,33 +12,37 @@ using UnityEngine.AI;
 public class BTFollow : BTBaseNode
 {
     private Animator animator;
-    private VariableFloat moveSpeed;
     private NavMeshAgent agent;
 
     private GameObject player;
+    private Player playerScript;
 
     private TextMesh stateText;
 
-    public BTFollow(Animator anim, VariableFloat speed, NavMeshAgent rogue, TextMesh text)
+    public BTFollow(Animator anim, NavMeshAgent rogue, TextMesh text, Player script)
     {
         animator = anim;
-        moveSpeed = speed;
         agent = rogue;
         player = GameObject.FindGameObjectWithTag("Player");
         stateText = text;
+        playerScript = script;
     }
 
     public override TaskStatus Run()
     {
-        stateText.text = "Follow";
-        //Debug.Log(Vector3.Distance(agent.gameObject.transform.position, player.transform.position));
-        if (Vector3.Distance(agent.gameObject.transform.position, player.transform.position) >= 5)
+        if (!playerScript.isBeingChased)
         {
-            agent.destination = player.transform.position;
-            animator.SetFloat("MoveSpeed", 3);
-            return TaskStatus.Running;
+            stateText.text = "Follow";
+            //Debug.Log(Vector3.Distance(agent.gameObject.transform.position, player.transform.position));
+            if (Vector3.Distance(agent.gameObject.transform.position, player.transform.position) >= 5)
+            {
+                agent.stoppingDistance = 5f;
+                agent.destination = player.transform.position;
+                animator.SetFloat("MoveSpeed", 3);
+                return TaskStatus.Running;
+            }
+            else return TaskStatus.Success;
         }
-        else return TaskStatus.Success;
-
+        return TaskStatus.Success;
     }
 }

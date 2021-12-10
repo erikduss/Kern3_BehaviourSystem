@@ -16,6 +16,9 @@ public class Player : MonoBehaviour, IDamageable
     private float hor = 0;
     private Vector3 moveDirection;
     private Collider mainCollider;
+
+    public bool isBeingChased = false;
+
     // Start is called before the first frame update
     void Start()
     {
