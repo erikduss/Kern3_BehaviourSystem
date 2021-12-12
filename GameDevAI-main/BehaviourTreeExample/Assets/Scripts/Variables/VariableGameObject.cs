@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "VariableGameObject_", menuName = "Variables/VariableGameObject")]
-public class VariableGameObject : BaseScriptableObject
+public class VariableGameObject
 {
     //Old value, New value
     public System.Action<GameObject, GameObject> OnValueChanged;

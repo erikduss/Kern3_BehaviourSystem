@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "VariableFloat_", menuName = "Variables/VariableFloat")]
-public class VariableFloat : BaseScriptableObject
+public class VariableFloat
 {
     //Old value, New value
     public System.Action<float, float> OnValueChanged;
