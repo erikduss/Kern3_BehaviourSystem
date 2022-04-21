@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Guard : MonoBehaviour
+public class GuardNew : MonoBehaviour
 {
     private BTBaseNode tree;
     private NavMeshAgent agent;
@@ -50,15 +50,9 @@ public class Guard : MonoBehaviour
 
         //Create your Behaviour Tree here!
         tree = new BTSequence(
-                /*new BTBaseNode[1]
-                {
-                    new BTInverter(new BTCanSeeObject(player, this.gameObject, maxDetectionRange, enemyFov))
-                },*/
                 new BTPickNewWanderPoint(waypointList, target, agent, stateText),
                 new BTAnimate(animator, "Rifle Walk", stateText),
-                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText),
-                new BTAnimate(animator, "Idle", stateText),
-                new BTWait(3f, stateText)
+                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText)
             );
     }
 

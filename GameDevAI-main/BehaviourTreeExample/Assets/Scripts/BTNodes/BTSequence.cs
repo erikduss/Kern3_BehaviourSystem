@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class BTSequence : BTBaseNode
 {
+    private int index = 0;
     private BTBaseNode[] nodes;
     public BTSequence(params BTBaseNode[] inputNodes)
     {
@@ -12,16 +13,16 @@ public class BTSequence : BTBaseNode
 
     public override TaskStatus Run()
     {
-        foreach (BTBaseNode node in nodes)
+        for (; index < nodes.Length; index++)
         {
-            TaskStatus result = node.Run();
-            switch (result)
+            switch (nodes[index].Run())
             {
                 case TaskStatus.Failed: return TaskStatus.Failed;
                 case TaskStatus.Success: continue;
                 case TaskStatus.Running: return TaskStatus.Running;
             }
         }
+        index = 0;
         return TaskStatus.Success;
     }
 }

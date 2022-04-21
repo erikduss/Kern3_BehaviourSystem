@@ -28,10 +28,10 @@ public class BTPickNewWanderPoint : BTBaseNode
             currentWaypoint = 0;
         }
 
-        if(curagent.remainingDistance > 0.1f)
+        /*if(curagent.remainingDistance > 0.1f)
         {
             return TaskStatus.Success;
-        }
+        }*/
 
         if(waypoints[currentWaypoint].gameObject != null)
         {

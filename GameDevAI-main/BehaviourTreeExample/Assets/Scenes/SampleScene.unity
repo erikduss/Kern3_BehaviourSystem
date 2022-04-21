@@ -601,7 +601,6 @@ MonoBehaviour:
   - {fileID: 1901004926}
   - {fileID: 1508979109}
   - {fileID: 1319444935}
-  target: {fileID: 0}
   stateText: {fileID: 485933393}
 --- !u!195 &539429223
 NavMeshAgent:
@@ -2047,7 +2046,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 794f0ee09c67de7498fb2d6bcc43074d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: {fileID: 0}
   stateText: {fileID: 443436207}
   coverSpots:
   - {fileID: 1835063055}
