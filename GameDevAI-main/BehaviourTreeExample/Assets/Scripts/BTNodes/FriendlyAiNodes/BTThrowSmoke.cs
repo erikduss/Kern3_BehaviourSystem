@@ -11,42 +11,25 @@ using UnityEngine.AI;
 
 public class BTThrowSmoke : BTBaseNode
 {
-    private NavMeshAgent agent;
-    private Player playerScript;
     private TextMesh stateText;
 
     private Animator anim;
     private Rogue rogueScript;
 
-    private VariableFloat canThrowBomb;
-
-    public BTThrowSmoke(NavMeshAgent rogue, TextMesh text, Player script, Animator animator, Rogue parentScript, VariableFloat canThrow)
+    public BTThrowSmoke(Animator animator, Rogue parentScript, TextMesh text)
     {
-        agent = rogue;
         stateText = text;
-        playerScript = script;
         anim = animator;
         rogueScript = parentScript;
-        canThrowBomb = canThrow;
     }
 
     public override TaskStatus Run()
     {
-        if (playerScript.isBeingChased)
-        {
-            stateText.text = "ThrowSmoke";
+        stateText.text = "ThrowSmoke";
+        
+        anim.Play("Throw");
+        rogueScript.SpawnSmokeBomb();
 
-            Debug.Log(canThrowBomb.Value);
-
-            if (canThrowBomb.Value > 0)
-            {
-                Debug.Log("Thowing");
-                anim.Play("Throw");
-                rogueScript.SpawnSmokeBomb();
-            }
-
-            return TaskStatus.Success;
-        }
-        return TaskStatus.Failed;
+        return TaskStatus.Success;
     }
 }

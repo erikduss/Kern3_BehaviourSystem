@@ -12,46 +12,34 @@ using UnityEngine.AI;
 public class BTSearchCover : BTBaseNode
 {
     private NavMeshAgent agent;
-    
-    private Player playerScript;
 
     private TextMesh stateText;
 
     private List<Transform> coverSpots;
 
-    private Animator anim;
 
-
-    public BTSearchCover(Animator animator, NavMeshAgent rogue, TextMesh text, Player script, List<Transform> cover)
+    public BTSearchCover(NavMeshAgent rogue, TextMesh text, List<Transform> cover)
     {
         agent = rogue;
         stateText = text;
-        playerScript = script;
         coverSpots = cover;
-        anim = animator;
     }
 
     public override TaskStatus Run()
     {
-        if (playerScript.isBeingChased)
+        if (coverSpots != null)
         {
-            if (coverSpots != null)
+            if (agent != null)
             {
-                if (agent != null)
+                stateText.text = "SearchCover";
+                agent.destination = FindClosestCover().position;
+                agent.stoppingDistance = 0.1f;
+                if (agent.remainingDistance < 0.1f)
                 {
-                    stateText.text = "SearchCover";
-                    anim.SetFloat("MoveSpeed", 3);
-                    agent.destination = FindClosestCover().position;
-                    agent.stoppingDistance = 0.1f;
-                    if (agent.remainingDistance < 0.1f)
-                    {
-                        anim.SetFloat("MoveSpeed", 0);
-                        return TaskStatus.Success;
-                    }
-                    return TaskStatus.Running;
+                    return TaskStatus.Success;
                 }
+                return TaskStatus.Running;
             }
-            return TaskStatus.Failed;
         }
         return TaskStatus.Failed;
     }

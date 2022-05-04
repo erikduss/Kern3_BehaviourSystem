@@ -8,17 +8,21 @@ public class BTCanSeeObject : BTBaseNode
     private GameObject origin;
     private float maxRange;
     private float fov;
+    private TextMesh stateText;
 
-    public BTCanSeeObject(GameObject _obj, GameObject _origin, float _maxRange, float _fov)
+    public BTCanSeeObject(GameObject _obj, GameObject _origin, float _maxRange, float _fov, TextMesh text)
     {
         detectionTarget = _obj;
         origin = _origin;
         maxRange = _maxRange;
         fov = _fov;
+        stateText = text;
     }
 
     public override TaskStatus Run()
     {
+        stateText.text = "BTCanSeeObject";
+
         if (IsObjectInFOV())
         {
             Vector3 direction = (detectionTarget.transform.position - origin.transform.position).normalized;

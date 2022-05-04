@@ -10,7 +10,7 @@ public class Guard : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
 
-    private float stoppingDistance;
+    private float stoppingDistance = 0.1f;
 
     [SerializeField] private Transform[] waypointList;
     [SerializeField] private Transform[] weaponList;
@@ -45,52 +45,94 @@ public class Guard : MonoBehaviour
     private void Start()
     {
         target = new VariableGameObject { Value = new GameObject("tempobj") };
+        lastKnownPlayerPosition = new VariableGameObject { Value = new GameObject("tempobj") };
+        lastKnownPlayerPosition.Value.transform.position = new Vector3(1,1,1);
         hasWeapon = new VariableFloat { Value = 0f };
         animator.SetBool("IsGuard", true);
 
         //Create your Behaviour Tree here!
-        tree = new BTSequence(
-                /*new BTBaseNode[1]
-                {
-                    new BTInverter(new BTCanSeeObject(player, this.gameObject, maxDetectionRange, enemyFov))
-                },*/
-                new BTPickNewWanderPoint(waypointList, target, agent, stateText),
-                new BTAnimate(animator, "Rifle Walk", stateText),
-                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText),
-                new BTAnimate(animator, "Idle", stateText),
-                new BTWait(3f, stateText)
+        tree = new BTSelector(
+                new BTSequence //Chase Sequence
+                (
+                    new BTCanSeeObject(player, this.gameObject, maxDetectionRange, enemyFov, stateText),
+                    new BTSetLastKnownPlayerPosition(lastKnownPlayerPosition, player, stateText),
+                    new BTSetCombatState(true, stateText),
+                    new BTSelector(
+                        new BTSequence //The enemy has a weapon
+                        (
+                            new BTCanSeeObject(player, this.gameObject, maxDetectionRange, enemyFov, stateText),
+                            new BTHasWeapon(hasWeapon, stateText),
+                            new BTSetPlayerAsTarget(target, agent, player, stateText),
+                            new BTAnimate(animator, "Run", stateText),
+                            new BTMoveToTarget(agent, runSpeed, target, stoppingDistance + 1.2f, stateText),
+                            new BTAnimate(animator, "Kick", stateText),
+                            new BTDamageTarget(target, agent.gameObject, 5000, stateText)
+                        ),
+                        new BTSequence //The enemy does not have a weapon yet
+                        (
+                            new BTLookForWeapon(weaponList, target, agent, stateText),
+                            new BTAnimate(animator, "Run", stateText),
+                            new BTMoveToTarget(agent, runSpeed, target, stoppingDistance, stateText),
+                            new BTPickUpWeapon(hasWeapon, stateText),
+                            new BTMoveToTarget(agent, runSpeed, lastKnownPlayerPosition, stoppingDistance, stateText),
+                            new BTAnimate(animator, "Idle", stateText),
+                            new BTWait(3f, stateText),
+                            new BTSetCombatState(false, stateText),
+                            new BTPickNewWanderPoint(waypointList, target, agent, stateText),
+                            new BTAnimate(animator, "Rifle Walk", stateText),
+                            new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText),
+                            new BTAnimate(animator, "Idle", stateText),
+                            new BTWait(3f, stateText)
+                        )
+                    )
+                ),
+                new BTSequence //Look for the player if combat state is active
+                (
+                    new BTIsAware(stateText),
+                    new BTHasWeapon(hasWeapon, stateText),
+
+                    new BTSelector
+                    (
+                        new BTSequence //back to attack cycle if the player has been spotted again
+                        (
+                            new BTCanSeeObject(player, this.gameObject, maxDetectionRange, enemyFov, stateText),
+                            new BTSetLastKnownPlayerPosition(lastKnownPlayerPosition, player, stateText),
+
+                            new BTSequence //back to attack cycle if the player has been spotted again
+                            (
+                                new BTCanSeeObject(player, this.gameObject, maxDetectionRange, enemyFov, stateText),
+                                new BTSetPlayerAsTarget(target, agent, player, stateText),
+                                new BTAnimate(animator, "Run", stateText),
+                                new BTMoveToTarget(agent, runSpeed, target, stoppingDistance + 1.2f, stateText),
+                                new BTAnimate(animator, "Kick", stateText),
+                                new BTDamageTarget(target, agent.gameObject, 5000, stateText)
+                            )
+                        ),
+                        new BTSequence
+                        (
+                            new BTAnimate(animator, "Run", stateText),
+                            new BTMoveToTarget(agent, runSpeed, lastKnownPlayerPosition, stoppingDistance, stateText),
+                            new BTAnimate(animator, "Idle", stateText),
+                            new BTWait(3f, stateText),
+                            new BTSetCombatState(false, stateText)
+                        )
+                    )
+                    
+                ),
+                new BTSequence //Wander Sequence
+                (
+                    new BTPickNewWanderPoint(waypointList, target, agent, stateText),
+                    new BTAnimate(animator, "Rifle Walk", stateText),
+                    new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText),
+                    new BTAnimate(animator, "Idle", stateText),
+                    new BTWait(3f, stateText)
+                )
             );
     }
 
     private void FixedUpdate()
     {
         tree?.Run();
-    }
-
-    private void RevertBackToWander()
-    {
-        playerInSight = false;
-        isChasing = false;
-        isOnGuard = false;
-        playerScript.isBeingChased = false;
-
-        target.Value = waypointList[1].gameObject;
-
-        tree = new BTSequence(
-                new BTPickNewWanderPoint(waypointList, target, agent, stateText),
-                new BTAnimate(animator, "Rifle Walk", stateText),
-                new BTMoveToTarget(agent, walkSpeed, target, stoppingDistance, stateText)
-            );
-    }
-
-    private IEnumerator GiveUpChase(int delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (!playerInSight)
-        {
-            RevertBackToWander();
-            Debug.Log("Giving up");
-        }
     }
 
     //private void OnDrawGizmos()

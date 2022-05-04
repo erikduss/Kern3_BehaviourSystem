@@ -8,20 +8,14 @@ public class BTLookForWeapon : BTBaseNode
     private Transform[] weapons;
     private VariableGameObject target;
     private NavMeshAgent curagent;
-    private VariableFloat guardHasWeapon;
-    private VariableGameObject lastKnownPlayerPosition;
-    private bool isChasing;
 
     private TextMesh stateText;
 
-    public BTLookForWeapon(Transform[] _weapons, VariableGameObject targ, NavMeshAgent agent, VariableFloat hasWeapon, VariableGameObject lastKnownPos, bool chasing, TextMesh text)
+    public BTLookForWeapon(Transform[] _weapons, VariableGameObject targ, NavMeshAgent agent, TextMesh text)
     {
         weapons = _weapons;
         target = targ;
         curagent = agent;
-        guardHasWeapon = hasWeapon;
-        lastKnownPlayerPosition = lastKnownPos;
-        isChasing = chasing;
         stateText = text;
     }
 
@@ -29,34 +23,15 @@ public class BTLookForWeapon : BTBaseNode
     {
         stateText.text = "LookForWeapon";
 
-        if (guardHasWeapon.Value < 1f)
+        if (weapons != null)
         {
-            if (weapons != null)
+            if (curagent != null && target != null)
             {
-                if (curagent != null && target != null)
-                {
-                    target.Value = FindClosestWeapon().gameObject;
-                    curagent.destination = target.Value.transform.position;
-                    if (curagent.remainingDistance < 0.1f)
-                    {
-                        guardHasWeapon.Value = 1f;
-                        target.Value = lastKnownPlayerPosition.Value;
-                        return TaskStatus.Success;
-                    }
-                    return TaskStatus.Running;
-                }
+                target.Value = FindClosestWeapon().gameObject;
+                return TaskStatus.Success;
             }
-            return TaskStatus.Failed;
         }
-        else if (!isChasing)
-        {
-            target.Value = lastKnownPlayerPosition.Value;
-            return TaskStatus.Success;
-        }
-        else
-        {
-            return TaskStatus.Success;
-        }
+        return TaskStatus.Failed;
     }
 
     private Transform FindClosestWeapon()

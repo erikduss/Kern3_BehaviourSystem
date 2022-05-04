@@ -12,6 +12,8 @@ public class Rogue : MonoBehaviour
     private Animator animator;
     private Player playerScript;
 
+    private GameObject playerObject;
+
     private VariableFloat canThrowBomb;
 
     [SerializeField] private TextMesh stateText;
@@ -32,21 +34,33 @@ public class Rogue : MonoBehaviour
         //TODO: Create your Behaviour tree here
         animator.SetBool("IsGuard", false);
         agent.stoppingDistance = 5f;
-        playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-
-        canThrowBomb = new VariableFloat { Value = 1f };
+        playerObject = GameObject.FindGameObjectWithTag("Player");
+        playerScript = playerObject.GetComponent<Player>();
         //moveSpeed = Instantiate(moveSpeed);
 
 
         tree =
-            new BTSequence
+            new BTSelector
             (
-                new BTFollow(animator, agent, stateText, playerScript),
-                new BTIdle(animator, agent, stateText, playerScript),
-                new BTSequence(
-                        new BTSearchCover(animator, agent, stateText, playerScript, coverSpots),
-                        new BTThrowSmoke(agent, stateText, playerScript, animator, this, canThrowBomb)
+                new BTSequence
+                (
+                    new BTIsSpotted(playerScript, stateText),
+                    new BTSequence
+                    (
+                        new BTSearchCover(agent, stateText, coverSpots),
+                        new BTAnimate(animator, "Throw", stateText),
+                        new BTThrowSmoke(animator, this, stateText),
+                        new BTAnimate(animator, "Crouch Idle", stateText),
+                        new BTWait(10f, stateText)
                     )
+                ),
+                new BTSequence
+                (
+                    new BTAnimate(animator, "Walk Crouch", stateText),
+                    new BTFollow(agent, playerObject, stateText),
+                    new BTAnimate(animator, "Crouch Idle", stateText),
+                    new BTIdle(agent, playerObject, stateText)
+                )
             );
     }
 
@@ -63,16 +77,6 @@ public class Rogue : MonoBehaviour
         float offsetZ = Random.Range(0, 5);
 
         activeSmoke = Instantiate(smokeBomb, new Vector3(playerObject.position.x + offsetX, playerObject.position.y, playerObject.position.z + offsetZ), Quaternion.identity);
-
-        StartCoroutine(SmokeBombDelay());
-    }
-
-    private IEnumerator SmokeBombDelay()
-    {
-        canThrowBomb.Value = 0;
-        yield return new WaitForSeconds(10);
-        Destroy(activeSmoke);
-        canThrowBomb.Value = 1;
     }
 
     //private void OnDrawGizmos()

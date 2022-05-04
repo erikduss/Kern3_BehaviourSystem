@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BTSequence : BTBaseNode
+public class BTSelector : BTBaseNode
 {
     private int index = 0;
     private BTBaseNode[] nodes;
-    public BTSequence(params BTBaseNode[] inputNodes)
+    public BTSelector(params BTBaseNode[] inputNodes)
     {
         nodes = inputNodes;
     }
 
     public override TaskStatus Run()
     {
-        for (; index < nodes.Length; index++)
+        foreach(BTBaseNode node in nodes)
         {
-            switch (nodes[index].Run())
+            switch (node.Run())
             {
-                case TaskStatus.Failed: index = 0; return TaskStatus.Failed;
+                case TaskStatus.Failed: continue;
                 case TaskStatus.Success: continue;
                 case TaskStatus.Running: return TaskStatus.Running;
             }
